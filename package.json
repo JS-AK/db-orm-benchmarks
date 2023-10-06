@@ -1,0 +1,41 @@
+{
+  "name": "db-orm-benchmarks",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./build/server/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf build",
+    "check": "tsc --project tsconfig.json",
+    "dev:local": "npm run clean && tsc-watch --onSuccess \" nodemon .\"",
+    "lint": "npm run check && eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "migrations:up": "node ./build/migrations/up.js",
+    "migrations:down": "node ./build/migrations/down.js",
+    "start": "npm run migrations:up && node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/pg": "^8.10.3",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "dotenv": "^16.3.1",
+    "drizzle-kit": "^0.19.13",
+    "eslint": "^8.43.0",
+    "eslint-plugin-sort-destructure-keys": "^1.5.0",
+    "eslint-plugin-sort-exports": "^0.8.0",
+    "prisma": "^5.4.1",
+    "rimraf": "^5.0.1",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@js-ak/db-manager": "^3.2.0",
+    "@prisma/client": "^5.4.1",
+    "drizzle-orm": "^0.28.6",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.33.0"
+  }
+}

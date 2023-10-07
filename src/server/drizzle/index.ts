@@ -57,7 +57,7 @@ export const addSeeds = async (config: {
 	const db = drizzle(pool);
 
 	const userExists = await db
-		.select({ id: Schemas.userRoles.id })
+		.select({ id: Schemas.users.id })
 		.from(Schemas.users)
 		.limit(1);
 

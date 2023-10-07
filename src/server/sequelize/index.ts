@@ -7,7 +7,7 @@ export const benchSequelize = async (queryCount: number, config: {
 	password: string;
 	database: string;
 }) => {
-	const { User } = init(config);
+	const { User, sequelize } = init(config);
 
 	const promises = [];
 
@@ -37,4 +37,6 @@ export const benchSequelize = async (queryCount: number, config: {
 
 		console.log(`Sequelize execTime: ${execTime}ms`);
 	}
+
+	await sequelize.close();
 };

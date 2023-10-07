@@ -41,4 +41,6 @@ export const benchPg = async (queryCount: number, config: {
 
 		console.log(`PG.pool execTime: ${execTime}ms`);
 	}
+
+	await pool.end();
 };

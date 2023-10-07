@@ -31,4 +31,6 @@ export const benchPrisma = async (queryCount: number) => {
 
 		console.log(`Prisma execTime: ${execTime}ms`);
 	}
+
+	await prisma.$disconnect();
 };

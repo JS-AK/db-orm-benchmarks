@@ -24,5 +24,5 @@ export const init = (config: {
 		salt: { type: DataTypes.STRING },
 	});
 
-	return { User };
+	return { User, sequelize };
 };

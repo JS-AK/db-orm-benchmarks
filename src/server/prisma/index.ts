@@ -7,7 +7,6 @@ export const benchPrisma = async (queryCount: number) => {
 
 	const users = await prisma.users.findMany({
 		select: { id: true },
-		take: queryCount,
 	});
 
 	function getRandomInt(min: number, max: number) {
@@ -24,12 +23,12 @@ export const benchPrisma = async (queryCount: number) => {
 	}
 
 	{
-		const start = Date.now();
+		const start = performance.now();
 
 		await Promise.all(promises);
-		const execTime = Math.round(Date.now() - start);
+		const execTime = Math.round(performance.now() - start);
 
-		console.log(`Prisma execTime: ${execTime}ms`);
+		console.log(`@prisma/client execTime: ${execTime}ms`);
 	}
 
 	await prisma.$disconnect();

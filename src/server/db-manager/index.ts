@@ -14,7 +14,6 @@ export const benchDbManager = async (queryCount: number, config: {
 	const promises = [];
 
 	const users = await user.getArrByParams({
-		pagination: { limit: queryCount, offset: 0 },
 		params: {},
 		selected: ["id"],
 	});
@@ -33,12 +32,12 @@ export const benchDbManager = async (queryCount: number, config: {
 	}
 
 	{
-		const start = Date.now();
+		const start = performance.now();
 
 		await Promise.all(promises);
-		const execTime = Math.round(Date.now() - start);
+		const execTime = Math.round(performance.now() - start);
 
-		console.log(`Db manager execTime: ${execTime}ms`);
+		console.log(`@js-ak/db-manager execTime: ${execTime}ms`);
 	}
 
 	await PG.BaseModel.getStandardPool(config).end();

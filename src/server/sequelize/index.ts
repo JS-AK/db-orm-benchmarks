@@ -12,7 +12,6 @@ export const benchSequelize = async (queryCount: number, config: {
 	const promises = [];
 
 	const users = (await User.findAll({
-		limit: queryCount,
 		attributes: ["id"],
 	})).map((e) => e.get({ plain: true }));
 
@@ -30,12 +29,12 @@ export const benchSequelize = async (queryCount: number, config: {
 	}
 
 	{
-		const start = Date.now();
+		const start = performance.now();
 
 		await Promise.all(promises);
-		const execTime = Math.round(Date.now() - start);
+		const execTime = Math.round(performance.now() - start);
 
-		console.log(`Sequelize execTime: ${execTime}ms`);
+		console.log(`sequelize execTime: ${execTime}ms`);
 	}
 
 	await sequelize.close();

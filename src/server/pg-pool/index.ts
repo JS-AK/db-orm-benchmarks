@@ -14,7 +14,6 @@ export const benchPg = async (queryCount: number, config: {
 	const users = (await pool.query<{ id: string; }>(`
 		SELECT id
 		FROM users
-		LIMIT ${queryCount}
 	`)).rows;
 
 	function getRandomInt(min: number, max: number) {
@@ -34,12 +33,12 @@ export const benchPg = async (queryCount: number, config: {
 	}
 
 	{
-		const start = Date.now();
+		const start = performance.now();
 
 		await Promise.all(promises);
-		const execTime = Math.round(Date.now() - start);
+		const execTime = Math.round(performance.now() - start);
 
-		console.log(`PG.pool execTime: ${execTime}ms`);
+		console.log(`pg.pool execTime: ${execTime}ms`);
 	}
 
 	await pool.end();

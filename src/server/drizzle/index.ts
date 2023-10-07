@@ -18,8 +18,7 @@ export const benchDrizzle = async (queryCount: number, config: {
 	const promises = [];
 
 	const users = await db.select({ id: Schemas.users.id })
-		.from(Schemas.users)
-		.limit(queryCount);
+		.from(Schemas.users);
 
 	function getRandomInt(min: number, max: number) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -34,12 +33,12 @@ export const benchDrizzle = async (queryCount: number, config: {
 	}
 
 	{
-		const start = Date.now();
+		const start = performance.now();
 
 		await Promise.all(promises);
-		const execTime = Math.round(Date.now() - start);
+		const execTime = Math.round(performance.now() - start);
 
-		console.log(`DRIZZLE execTime: ${execTime}ms`);
+		console.log(`drizzle-orm execTime: ${execTime}ms`);
 	}
 
 	await pool.end();

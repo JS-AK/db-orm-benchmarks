@@ -1,6 +1,7 @@
 db-orm-benchmarks
 
 50_000 queries in await Promise.all() ("SELECT email FROM users WHERE users.id = $1") with random users.id
+
 10 separately times
 
 ```typescript

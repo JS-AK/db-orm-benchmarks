@@ -5,6 +5,7 @@ import { benchDbManager } from "./db-manager/index.js";
 import { benchPg } from "./pg-pool/index.js";
 import { benchPrisma } from "./prisma/index.js";
 import { benchSequelize } from "./sequelize/index.js";
+import { benchTypeorm } from "./typeorm/index.js";
 
 const queryCount = 50_000;
 
@@ -26,28 +27,6 @@ if (!config) {
 		const times = [];
 
 		for (let index = 0; index < 10; index++) {
-			const time = await benchDrizzle(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			times.push(time);
-		}
-
-		console.log("benchDrizzle", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchDrizzle", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
 			const time = await benchPg(queryCount, {
 				database: config.DB_POSTGRE_DATABASE,
 				host: config.DB_POSTGRE_HOST,
@@ -64,6 +43,28 @@ if (!config) {
 		const avg = (sum / times.length) || 0;
 
 		console.log("benchPg", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchDrizzle(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchDrizzle", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchDrizzle", avg + "ms");
 	}
 
 	{
@@ -124,5 +125,27 @@ if (!config) {
 		const avg = (sum / times.length) || 0;
 
 		console.log("benchSequelize", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchTypeorm(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchTypeorm", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchTypeorm", avg + "ms");
 	}
 }

@@ -34,6 +34,7 @@
     "drizzle-orm": "^0.28.6",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.33.0"
+    "sequelize": "^6.33.0",
+    "typeorm": "^0.3.17"
   }
 }

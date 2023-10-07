@@ -28,14 +28,12 @@ export const benchSequelize = async (queryCount: number, config: {
 		);
 	}
 
-	{
-		const start = performance.now();
+	const start = performance.now();
 
-		await Promise.all(promises);
-		const execTime = Math.round(performance.now() - start);
-
-		console.log(`sequelize execTime: ${execTime}ms`);
-	}
+	await Promise.all(promises);
+	const execTime = Math.round(performance.now() - start);
 
 	await sequelize.close();
+
+	return execTime;
 };

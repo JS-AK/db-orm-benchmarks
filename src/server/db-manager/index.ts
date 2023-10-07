@@ -31,14 +31,12 @@ export const benchDbManager = async (queryCount: number, config: {
 		);
 	}
 
-	{
-		const start = performance.now();
+	const start = performance.now();
 
-		await Promise.all(promises);
-		const execTime = Math.round(performance.now() - start);
+	await Promise.all(promises);
+	const execTime = Math.round(performance.now() - start);
 
-		console.log(`@js-ak/db-manager execTime: ${execTime}ms`);
-	}
+	await PG.BaseModel.removeStandardPool(config);
 
-	await PG.BaseModel.getStandardPool(config).end();
+	return execTime;
 };

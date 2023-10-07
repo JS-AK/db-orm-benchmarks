@@ -32,16 +32,14 @@ export const benchDrizzle = async (queryCount: number, config: {
 		);
 	}
 
-	{
-		const start = performance.now();
+	const start = performance.now();
 
-		await Promise.all(promises);
-		const execTime = Math.round(performance.now() - start);
-
-		console.log(`drizzle-orm execTime: ${execTime}ms`);
-	}
+	await Promise.all(promises);
+	const execTime = Math.round(performance.now() - start);
 
 	await pool.end();
+
+	return execTime;
 };
 
 export const addSeeds = async (config: {

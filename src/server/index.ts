@@ -21,33 +21,108 @@ if (!config) {
 		port: config.DB_POSTGRE_PORT,
 		user: config.DB_POSTGRE_USER,
 	});
-	await benchDrizzle(queryCount, {
-		database: config.DB_POSTGRE_DATABASE,
-		host: config.DB_POSTGRE_HOST,
-		password: config.DB_POSTGRE_PASSWORD,
-		port: config.DB_POSTGRE_PORT,
-		user: config.DB_POSTGRE_USER,
-	});
-	await benchPg(queryCount, {
-		database: config.DB_POSTGRE_DATABASE,
-		host: config.DB_POSTGRE_HOST,
-		password: config.DB_POSTGRE_PASSWORD,
-		port: config.DB_POSTGRE_PORT,
-		user: config.DB_POSTGRE_USER,
-	});
-	await benchDbManager(queryCount, {
-		database: config.DB_POSTGRE_DATABASE,
-		host: config.DB_POSTGRE_HOST,
-		password: config.DB_POSTGRE_PASSWORD,
-		port: config.DB_POSTGRE_PORT,
-		user: config.DB_POSTGRE_USER,
-	});
-	await benchPrisma(queryCount);
-	await benchSequelize(queryCount, {
-		database: config.DB_POSTGRE_DATABASE,
-		host: config.DB_POSTGRE_HOST,
-		password: config.DB_POSTGRE_PASSWORD,
-		port: config.DB_POSTGRE_PORT,
-		user: config.DB_POSTGRE_USER,
-	});
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchDrizzle(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchDrizzle", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchDrizzle", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchPg(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchPg", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchPg", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchDbManager(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchDbManager", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchDbManager", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchPrisma(queryCount);
+
+			times.push(time);
+		}
+
+		console.log("benchPrisma", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchPrisma", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchSequelize(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			times.push(time);
+		}
+
+		console.log("benchSequelize", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchSequelize", avg + "ms");
+	}
 }

@@ -22,14 +22,12 @@ export const benchPrisma = async (queryCount: number) => {
 		);
 	}
 
-	{
-		const start = performance.now();
+	const start = performance.now();
 
-		await Promise.all(promises);
-		const execTime = Math.round(performance.now() - start);
-
-		console.log(`@prisma/client execTime: ${execTime}ms`);
-	}
+	await Promise.all(promises);
+	const execTime = Math.round(performance.now() - start);
 
 	await prisma.$disconnect();
+
+	return execTime;
 };

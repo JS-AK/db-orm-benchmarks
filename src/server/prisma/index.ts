@@ -5,6 +5,8 @@ export const benchPrisma = async (queryCount: number) => {
 
 	const promises = [];
 
+	await prisma.$connect();
+
 	const users = await prisma.users.findMany({
 		select: { id: true },
 	});

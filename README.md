@@ -2,6 +2,7 @@ db-orm-benchmarks
 
 **postgresql**
 
+### await Promise.all()
 50_000 queries in await Promise.all() ("SELECT email FROM users WHERE users.id = $1") with random users.id
 
 10 separately times
@@ -21,7 +22,7 @@ db-orm-benchmarks
 └───────────────────┴───────────────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴──────────┘
 ```
 
-
+### await one by one in for loop
 50_000 queries in await one by one in for loop ("SELECT email FROM users WHERE users.id = $1") with random users.id
 
 10 separately times

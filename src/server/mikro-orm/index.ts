@@ -1,19 +1,18 @@
+import { User } from "./entities/User.js";
 import { init } from "./schema.js";
 
-export const benchSequelize = async (queryCount: number, config: {
+export const benchMikroOrm = async (queryCount: number, config: {
 	host: string;
 	port: number;
 	user: string;
 	password: string;
 	database: string;
 }) => {
-	const { User, sequelize } = init(config);
+	const { orm } = await init(config);
 
 	const promises = [];
 
-	const users = (await User.findAll({
-		attributes: ["id"],
-	})).map((e) => e.get({ plain: true }));
+	const users = await orm.em.fork().getRepository(User).find({}, { fields: ["id"] });
 
 	function getRandomInt(min: number, max: number) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,19 +22,19 @@ export const benchSequelize = async (queryCount: number, config: {
 		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
 
 		promises.push(
-			User.findOne({
-				attributes: ["email"],
-				where: { id: randomUserId },
-			}),
+			orm.em.fork().getRepository(User).findOne(
+				{ id: randomUserId },
+				{ fields: ["id"] },
+			),
 		);
 	}
-
 	const start = performance.now();
 
 	await Promise.all(promises);
+
 	const execTime = Math.round(performance.now() - start);
 
-	await sequelize.close();
+	await orm.close();
 
 	return execTime;
 };

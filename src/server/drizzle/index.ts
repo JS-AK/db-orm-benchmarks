@@ -25,10 +25,12 @@ export const benchDrizzle = async (queryCount: number, config: {
 	}
 
 	for (let i = 0; i < queryCount; i++) {
+		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+
 		promises.push(
 			db.select({ email: Schemas.users.email })
 				.from(Schemas.users)
-				.where(eq(Schemas.users.id, users[getRandomInt(0, users.length - 1)]?.id as string)),
+				.where(eq(Schemas.users.id, randomUserId)),
 		);
 	}
 

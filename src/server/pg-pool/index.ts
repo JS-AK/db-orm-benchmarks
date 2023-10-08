@@ -18,10 +18,12 @@ export const benchPg = async (queryCount: number, config: {
 	}
 
 	for (let i = 0; i < queryCount; i++) {
+		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+
 		promises.push(
 			pool.query(
 				"SELECT email FROM users WHERE users.id = $1",
-				[users[getRandomInt(0, users.length - 1)]?.id as string],
+				[randomUserId],
 			),
 		);
 	}

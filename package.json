@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "migrations:up": "node ./build/migrations/up.js",
     "migrations:down": "node ./build/migrations/down.js",
-    "start": "npm run migrations:up && node ."
+    "start": "npm run build && npm run migrations:up && node ."
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@js-ak/db-manager": "^3.2.0",
+    "@mikro-orm/core": "^5.8.7",
+    "@mikro-orm/postgresql": "^5.8.7",
     "@prisma/client": "^5.4.1",
     "drizzle-orm": "^0.28.6",
     "pg": "^8.11.3",

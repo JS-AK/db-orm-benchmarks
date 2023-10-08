@@ -23,9 +23,11 @@ export const benchDbManager = async (queryCount: number, config: {
 	}
 
 	for (let i = 0; i < queryCount; i++) {
+		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+
 		promises.push(
 			user.getOneByParams({
-				params: { id: users[getRandomInt(0, users.length - 1)]?.id as string },
+				params: { id: randomUserId },
 				selected: ["email"],
 			}),
 		);

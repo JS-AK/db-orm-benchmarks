@@ -1,19 +1,20 @@
-import { User, init } from "./schema.js";
+import { init } from "./schema.js";
 
-export const benchTypeorm = async (queryCount: number, config: {
+export const benchKysely = async (queryCount: number, config: {
 	host: string;
 	port: number;
 	user: string;
 	password: string;
 	database: string;
 }) => {
-	const { PostgresDataSource } = await init(config);
+	const { db } = await init(config);
 
 	const promises = [];
 
-	const users = (await PostgresDataSource
-		.getRepository(User)
-		.find({ select: ["id"] }));
+	const users = await db
+		.selectFrom("users")
+		.select("id")
+		.execute();
 
 	function getRandomInt(min: number, max: number) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,12 +24,10 @@ export const benchTypeorm = async (queryCount: number, config: {
 		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
 
 		promises.push(
-			PostgresDataSource
-				.getRepository(User)
-				.findOne({
-					select: ["email"],
-					where: { id: randomUserId },
-				}),
+			db.selectFrom("users")
+				.where("id", "=", randomUserId)
+				.select("email")
+				.executeTakeFirst(),
 		);
 	}
 
@@ -37,7 +36,7 @@ export const benchTypeorm = async (queryCount: number, config: {
 	await Promise.all(promises);
 	const execTime = Math.round(performance.now() - start);
 
-	await PostgresDataSource.destroy();
+	await db.destroy();
 
 	return execTime;
 };

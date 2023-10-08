@@ -2,6 +2,7 @@ import { getConfig } from "../server/config/index.js";
 
 import { addSeeds, benchDrizzle } from "./drizzle/index.js";
 import { benchDbManager } from "./db-manager/index.js";
+import { benchKysely } from "./kysely/index.js";
 import { benchMikroOrm } from "./mikro-orm/index.js";
 import { benchPg } from "./pg-pool/index.js";
 import { benchPrisma } from "./prisma/index.js";
@@ -172,5 +173,29 @@ if (!config) {
 		const avg = (sum / times.length) || 0;
 
 		console.log("benchMikroOrm", avg + "ms");
+	}
+
+	{
+		const times = [];
+
+		for (let index = 0; index < 10; index++) {
+			const time = await benchKysely(queryCount, {
+				database: config.DB_POSTGRE_DATABASE,
+				host: config.DB_POSTGRE_HOST,
+				password: config.DB_POSTGRE_PASSWORD,
+				port: config.DB_POSTGRE_PORT,
+				user: config.DB_POSTGRE_USER,
+			});
+
+			console.log(time);
+
+			times.push(time);
+		}
+
+		console.log("benchKysely", times.map((e) => `${e}ms`).join(" "));
+		const sum = times.reduce((a, b) => a + b, 0);
+		const avg = (sum / times.length) || 0;
+
+		console.log("benchKysely", avg + "ms");
 	}
 }

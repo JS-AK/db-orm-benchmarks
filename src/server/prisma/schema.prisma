@@ -16,6 +16,6 @@ model users {
   is_deleted  Boolean
   password    String?
   salt        String?
-  created_at  DateTime?
-  updated_at  String?
+  created_at  DateTime
+  updated_at  DateTime?
 }

@@ -1,15 +1,16 @@
 import { getConfig } from "../server/config/index.js";
 
-import { addSeeds, benchDrizzle } from "./drizzle/index.js";
-import { benchDbManager } from "./db-manager/index.js";
-import { benchKysely } from "./kysely/index.js";
-import { benchMikroOrm } from "./mikro-orm/index.js";
-import { benchPg } from "./pg-pool/index.js";
-import { benchPrisma } from "./prisma/index.js";
-import { benchSequelize } from "./sequelize/index.js";
-import { benchTypeorm } from "./typeorm/index.js";
+import * as DbManager from "./db-manager/index.js";
+import * as Drizzle from "./drizzle/index.js";
+import * as Kysely from "./kysely/index.js";
+import * as MikroOrm from "./mikro-orm/index.js";
+import * as Pg from "./pg-pool/index.js";
+import * as Prisma from "./prisma/index.js";
+import * as Sequelize from "./sequelize/index.js";
+import * as TypeOrm from "./typeorm/index.js";
 
 const queryCount = 50_000;
+const count = 10;
 
 const { data: config, message } = getConfig();
 
@@ -17,7 +18,7 @@ if (!config) {
 	process.stderr.write(`${message}\n`);
 	process.exit(1);
 } else {
-	await addSeeds({
+	await Drizzle.addSeeds({
 		database: config.DB_POSTGRE_DATABASE,
 		host: config.DB_POSTGRE_HOST,
 		password: config.DB_POSTGRE_PASSWORD,
@@ -25,177 +26,69 @@ if (!config) {
 		user: config.DB_POSTGRE_USER,
 	});
 
-	{
-		const times = [];
+	await startBench({ benchFunction: Pg.bench, queryCount, count, name: "pg.Pool Promise.All", config });
+	await startBench({ benchFunction: Pg.benchOneByOne, queryCount, count, name: "pg.Pool OneByOne", config });
 
-		for (let index = 0; index < 10; index++) {
-			const time = await benchPg(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
+	await startBench({ benchFunction: Drizzle.bench, queryCount, count, name: "drizzle Promise.All", config });
+	await startBench({ benchFunction: Drizzle.benchOneByOne, queryCount, count, name: "drizzle OneByOne", config });
 
-			times.push(time);
-		}
+	await startBench({ benchFunction: DbManager.bench, queryCount, count, name: "db-manager Promise.All", config });
+	await startBench({ benchFunction: DbManager.benchOneByOne, queryCount, count, name: "db-manager OneByOne", config });
 
-		console.log("benchPg", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
+	await startBench({ benchFunction: Prisma.bench, queryCount, count, name: "prisma Promise.All", config });
+	await startBench({ benchFunction: Prisma.benchOneByOne, queryCount, count, name: "prisma OneByOne", config });
 
-		console.log("benchPg", avg + "ms");
+	await startBench({ benchFunction: Sequelize.bench, queryCount, count, name: "sequelize Promise.All", config });
+	await startBench({ benchFunction: Sequelize.benchOneByOne, queryCount, count, name: "sequelize OneByOne", config });
+
+	await startBench({ benchFunction: TypeOrm.bench, queryCount, count, name: "typeorm Promise.All", config });
+	await startBench({ benchFunction: TypeOrm.benchOneByOne, queryCount, count, name: "typeorm OneByOne", config });
+
+	await startBench({ benchFunction: MikroOrm.bench, queryCount, count, name: "mikro-orm Promise.All", config });
+	await startBench({ benchFunction: MikroOrm.benchOneByOne, queryCount, count, name: "mikro-orm OneByOne", config });
+
+	await startBench({ benchFunction: Kysely.bench, queryCount, count, name: "kysely Promise.All", config });
+	await startBench({ benchFunction: Kysely.benchOneByOne, queryCount, count, name: "kysely OneByOne", config });
+}
+
+async function startBench(data: {
+	benchFunction: any;
+	config: {
+		DB_POSTGRE_DATABASE: string;
+		DB_POSTGRE_HOST: string;
+		DB_POSTGRE_PASSWORD: string;
+		DB_POSTGRE_PORT: number;
+		DB_POSTGRE_USER: string;
+	};
+	count: number;
+	name: string;
+	queryCount: number;
+}) {
+	const {
+		benchFunction,
+		config,
+		count,
+		name,
+		queryCount,
+	} = data;
+
+	const times = [];
+
+	for (let index = 0; index < count; index++) {
+		const time = await benchFunction(queryCount, {
+			database: config.DB_POSTGRE_DATABASE,
+			host: config.DB_POSTGRE_HOST,
+			password: config.DB_POSTGRE_PASSWORD,
+			port: config.DB_POSTGRE_PORT,
+			user: config.DB_POSTGRE_USER,
+		});
+
+		times.push(time);
 	}
 
-	{
-		const times = [];
+	console.log(name, times.map((e) => `${e}ms`).join(" "));
+	const sum = times.reduce((a, b) => a + b, 0);
+	const avg = (sum / times.length) || 0;
 
-		for (let index = 0; index < 10; index++) {
-			const time = await benchDrizzle(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			times.push(time);
-		}
-
-		console.log("benchDrizzle", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchDrizzle", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchDbManager(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			times.push(time);
-		}
-
-		console.log("benchDbManager", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchDbManager", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchPrisma(queryCount);
-
-			times.push(time);
-		}
-
-		console.log("benchPrisma", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchPrisma", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchSequelize(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			times.push(time);
-		}
-
-		console.log("benchSequelize", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchSequelize", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchTypeorm(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			times.push(time);
-		}
-
-		console.log("benchTypeorm", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchTypeorm", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchMikroOrm(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			console.log(time);
-
-			times.push(time);
-		}
-
-		console.log("benchMikroOrm", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchMikroOrm", avg + "ms");
-	}
-
-	{
-		const times = [];
-
-		for (let index = 0; index < 10; index++) {
-			const time = await benchKysely(queryCount, {
-				database: config.DB_POSTGRE_DATABASE,
-				host: config.DB_POSTGRE_HOST,
-				password: config.DB_POSTGRE_PASSWORD,
-				port: config.DB_POSTGRE_PORT,
-				user: config.DB_POSTGRE_USER,
-			});
-
-			console.log(time);
-
-			times.push(time);
-		}
-
-		console.log("benchKysely", times.map((e) => `${e}ms`).join(" "));
-		const sum = times.reduce((a, b) => a + b, 0);
-		const avg = (sum / times.length) || 0;
-
-		console.log("benchKysely", avg + "ms");
-	}
+	console.log(name, avg + "ms");
 }

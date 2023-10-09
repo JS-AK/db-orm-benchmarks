@@ -1,6 +1,4 @@
-db-orm-benchmarks
-
-**postgresql**
+db-orm-benchmarks for **Postgresql**
 
 ### await Promise.all()
 50_000 queries in await Promise.all() ("SELECT email FROM users WHERE users.id = $1") with random users.id

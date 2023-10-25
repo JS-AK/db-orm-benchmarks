@@ -18,8 +18,10 @@ export const bench = async (queryCount: number, config: {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	const start = performance.now();
+
 	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
 			orm.em.fork().getRepository(User).findOne(
@@ -28,7 +30,6 @@ export const bench = async (queryCount: number, config: {
 			),
 		);
 	}
-	const start = performance.now();
 
 	await Promise.all(promises);
 
@@ -56,8 +57,10 @@ export const benchOneByOne = async (queryCount: number, config: {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	const start = performance.now();
+
 	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
 			orm.em.fork().getRepository(User).findOne(
@@ -66,7 +69,6 @@ export const benchOneByOne = async (queryCount: number, config: {
 			),
 		);
 	}
-	const start = performance.now();
 
 	for (const promise of promises) await promise;
 

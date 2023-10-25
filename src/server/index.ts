@@ -4,6 +4,7 @@ import * as DbManager from "./db-manager/index.js";
 import * as Drizzle from "./drizzle/index.js";
 import * as Kysely from "./kysely/index.js";
 import * as MikroOrm from "./mikro-orm/index.js";
+import * as Objection from "./objection/index.js";
 import * as Pg from "./pg-pool/index.js";
 import * as Prisma from "./prisma/index.js";
 import * as Sequelize from "./sequelize/index.js";
@@ -47,6 +48,9 @@ if (!config) {
 	await startBench({ benchFunction: MikroOrm.bench, queryCount, count, name: "mikro-orm Promise.All", config });
 	await startBench({ benchFunction: MikroOrm.benchOneByOne, queryCount, count, name: "mikro-orm OneByOne", config });
 
+	await startBench({ benchFunction: Objection.bench, queryCount, count, name: "Objection.js Promise.All", config });
+	await startBench({ benchFunction: Objection.benchOneByOne, queryCount, count, name: "Objection.js OneByOne", config });
+
 	await startBench({ benchFunction: Kysely.bench, queryCount, count, name: "kysely Promise.All", config });
 	await startBench({ benchFunction: Kysely.benchOneByOne, queryCount, count, name: "kysely OneByOne", config });
 }
@@ -86,9 +90,11 @@ async function startBench(data: {
 		times.push(time);
 	}
 
-	console.log(name, times.map((e) => `${e}ms`).join(" "));
 	const sum = times.reduce((a, b) => a + b, 0);
 	const avg = (sum / times.length) || 0;
+	const avgQPS = Math.round((queryCount / avg) * 1000) || 0;
 
-	console.log(name, avg + "ms");
+	console.log(`${name} avg query per sec ${avgQPS}`);
+	console.log(`${name} ${times.map((e) => `${e}ms`).join(" ")}`);
+	console.log(`${name} avg ${avg}ms`);
 }

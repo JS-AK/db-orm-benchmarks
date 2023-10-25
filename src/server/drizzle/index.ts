@@ -24,8 +24,10 @@ export const bench = async (queryCount: number, config: {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	const start = performance.now();
+
 	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
 			db.select({ email: Schemas.users.email })
@@ -33,8 +35,6 @@ export const bench = async (queryCount: number, config: {
 				.where(eq(Schemas.users.id, randomUserId)),
 		);
 	}
-
-	const start = performance.now();
 
 	await Promise.all(promises);
 	const execTime = Math.round(performance.now() - start);
@@ -64,8 +64,10 @@ export const benchOneByOne = async (queryCount: number, config: {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	const start = performance.now();
+
 	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(0, users.length - 1)]?.id as string;
+		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
 			db.select({ email: Schemas.users.email })
@@ -74,10 +76,8 @@ export const benchOneByOne = async (queryCount: number, config: {
 		);
 	}
 
-	const start = performance.now();
-
 	for (const promise of promises) await promise;
-	
+
 	const execTime = Math.round(performance.now() - start);
 
 	await pool.end();

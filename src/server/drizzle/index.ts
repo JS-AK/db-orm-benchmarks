@@ -101,7 +101,7 @@ export const addSeeds = async (config: {
 		.from(Schemas.users)
 		.limit(1);
 
-	if (userExists) {
+	if (userExists.length) {
 		await pool.end();
 
 		return;

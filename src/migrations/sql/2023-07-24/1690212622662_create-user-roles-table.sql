@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS user_roles;
-
 CREATE TABLE user_roles(
     id                              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 

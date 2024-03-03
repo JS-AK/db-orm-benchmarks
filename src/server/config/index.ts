@@ -8,18 +8,16 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "..", "..", "..", ".env") });
 
-// const convertEnvToBoolean = (defaultBoolean: boolean, env?: string) => {
-// if (env) {
-// if (env.toLowerCase() === "true") return true;
-// else if (env.toLowerCase() === "false") return false;
-// else throw new Error(`Wrong boolean env ${env} incoming`);
-// }
-
-// return defaultBoolean;
-// };
-
 export type ConfigOptions = {
-	DB_POSTGRE_DATABASE: string;
+	DB_POSTGRE_DATABASE_PG_POOL: string;
+	DB_POSTGRE_DATABASE_DRIZZLE: string;
+	DB_POSTGRE_DATABASE_DB_MANAGER: string;
+	DB_POSTGRE_DATABASE_PRISMA: string;
+	DB_POSTGRE_DATABASE_SEQUELIZE: string;
+	DB_POSTGRE_DATABASE_TYPEORM: string;
+	DB_POSTGRE_DATABASE_MIKRO_ORM: string;
+	DB_POSTGRE_DATABASE_OBJECTION_JS: string;
+	DB_POSTGRE_DATABASE_KYSELY: string;
 	DB_POSTGRE_HOST: string;
 	DB_POSTGRE_PASSWORD: string;
 	DB_POSTGRE_PORT: number;
@@ -29,7 +27,15 @@ export type ConfigOptions = {
 };
 
 type ConfigOptionsRaw = {
-	DB_POSTGRE_DATABASE?: string;
+	DB_POSTGRE_DATABASE_PG_POOL?: string;
+	DB_POSTGRE_DATABASE_DRIZZLE?: string;
+	DB_POSTGRE_DATABASE_DB_MANAGER?: string;
+	DB_POSTGRE_DATABASE_PRISMA?: string;
+	DB_POSTGRE_DATABASE_SEQUELIZE?: string;
+	DB_POSTGRE_DATABASE_TYPEORM?: string;
+	DB_POSTGRE_DATABASE_MIKRO_ORM?: string;
+	DB_POSTGRE_DATABASE_OBJECTION_JS?: string;
+	DB_POSTGRE_DATABASE_KYSELY?: string;
 	DB_POSTGRE_HOST?: string;
 	DB_POSTGRE_PASSWORD?: string;
 	DB_POSTGRE_PORT?: string;
@@ -37,7 +43,15 @@ type ConfigOptionsRaw = {
 };
 
 const config: ConfigOptionsRaw = {
-	DB_POSTGRE_DATABASE: process.env.DB_POSTGRE_DATABASE,
+	DB_POSTGRE_DATABASE_PG_POOL: process.env.DB_POSTGRE_DATABASE_PG_POOL,
+	DB_POSTGRE_DATABASE_DRIZZLE: process.env.DB_POSTGRE_DATABASE_DRIZZLE,
+	DB_POSTGRE_DATABASE_DB_MANAGER: process.env.DB_POSTGRE_DATABASE_DB_MANAGER,
+	DB_POSTGRE_DATABASE_PRISMA: process.env.DB_POSTGRE_DATABASE_PRISMA,
+	DB_POSTGRE_DATABASE_SEQUELIZE: process.env.DB_POSTGRE_DATABASE_SEQUELIZE,
+	DB_POSTGRE_DATABASE_TYPEORM: process.env.DB_POSTGRE_DATABASE_TYPEORM,
+	DB_POSTGRE_DATABASE_MIKRO_ORM: process.env.DB_POSTGRE_DATABASE_MIKRO_ORM,
+	DB_POSTGRE_DATABASE_OBJECTION_JS: process.env.DB_POSTGRE_DATABASE_OBJECTION_JS,
+	DB_POSTGRE_DATABASE_KYSELY: process.env.DB_POSTGRE_DATABASE_KYSELY,
 	DB_POSTGRE_HOST: process.env.DB_POSTGRE_HOST,
 	DB_POSTGRE_PASSWORD: process.env.DB_POSTGRE_PASSWORD,
 	DB_POSTGRE_PORT: process.env.DB_POSTGRE_PORT,
@@ -57,7 +71,15 @@ export const getConfig = (): {
 
 	return {
 		data: {
-			DB_POSTGRE_DATABASE: preparedConfig.DB_POSTGRE_DATABASE,
+			DB_POSTGRE_DATABASE_PG_POOL: preparedConfig.DB_POSTGRE_DATABASE_PG_POOL,
+			DB_POSTGRE_DATABASE_DRIZZLE: preparedConfig.DB_POSTGRE_DATABASE_DRIZZLE,
+			DB_POSTGRE_DATABASE_DB_MANAGER: preparedConfig.DB_POSTGRE_DATABASE_DB_MANAGER,
+			DB_POSTGRE_DATABASE_PRISMA: preparedConfig.DB_POSTGRE_DATABASE_PRISMA,
+			DB_POSTGRE_DATABASE_SEQUELIZE: preparedConfig.DB_POSTGRE_DATABASE_SEQUELIZE,
+			DB_POSTGRE_DATABASE_TYPEORM: preparedConfig.DB_POSTGRE_DATABASE_TYPEORM,
+			DB_POSTGRE_DATABASE_MIKRO_ORM: preparedConfig.DB_POSTGRE_DATABASE_MIKRO_ORM,
+			DB_POSTGRE_DATABASE_OBJECTION_JS: preparedConfig.DB_POSTGRE_DATABASE_OBJECTION_JS,
+			DB_POSTGRE_DATABASE_KYSELY: preparedConfig.DB_POSTGRE_DATABASE_KYSELY,
 			DB_POSTGRE_HOST: preparedConfig.DB_POSTGRE_HOST,
 			DB_POSTGRE_PASSWORD: preparedConfig.DB_POSTGRE_PASSWORD,
 			DB_POSTGRE_PORT: parseInt(preparedConfig.DB_POSTGRE_PORT, 10),

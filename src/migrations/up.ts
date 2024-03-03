@@ -1,32 +1,36 @@
-import dotenv from "dotenv";
 import path from "node:path";
 
-import PG from "pg";
+import { PG } from "@js-ak/db-manager";
 
-import * as DbMigrationSystem from "./lib/index.js";
-import { getConfig } from "../server/config/index.js";
+export const start = async (config: any) => {
+	const databases = [
+		config.DB_POSTGRE_DATABASE_DB_MANAGER,
+		config.DB_POSTGRE_DATABASE_DRIZZLE,
+		config.DB_POSTGRE_DATABASE_KYSELY,
+		config.DB_POSTGRE_DATABASE_MIKRO_ORM,
+		config.DB_POSTGRE_DATABASE_OBJECTION_JS,
+		config.DB_POSTGRE_DATABASE_PG_POOL,
+		config.DB_POSTGRE_DATABASE_PRISMA,
+		config.DB_POSTGRE_DATABASE_SEQUELIZE,
+		config.DB_POSTGRE_DATABASE_TYPEORM,
+	];
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+	for (const database of databases) {
+		const settings = {
+			database,
+			host: config.DB_POSTGRE_HOST,
+			password: config.DB_POSTGRE_PASSWORD,
+			port: config.DB_POSTGRE_PORT,
+			user: config.DB_POSTGRE_USER,
+		};
 
-const { data: dataConfig, message } = getConfig();
+		const pool = PG.BaseModel.getStandardPool(settings);
 
-if (!dataConfig) {
-	process.stderr.write(`${message}\n`);
-	process.exit(1);
-} else {
-	const pool = new PG.Pool({
-		host: dataConfig.DB_POSTGRE_HOST,
-		port: dataConfig.DB_POSTGRE_PORT,
-		user: dataConfig.DB_POSTGRE_USER,
-		password: dataConfig.DB_POSTGRE_PASSWORD,
-		database: dataConfig.DB_POSTGRE_DATABASE,
-	});
+		await PG.MigrationSystem.Up.start(pool, {
+			migrationsTableName: "migration_control",
+			pathToSQL: path.resolve(process.cwd(), "src", "migrations", "sql"),
+		});
 
-	await DbMigrationSystem.Up.start(pool, {
-		migrationsTableName: "migration_control",
-		// pathToJS: path.resolve(process.cwd(), "build", "migrations", "js"),
-		pathToSQL: path.resolve(process.cwd(), "src", "migrations", "sql"),
-	});
-
-	await pool.end();
-}
+		await PG.BaseModel.removeStandardPool(settings);
+	}
+};

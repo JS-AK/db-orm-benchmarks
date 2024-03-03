@@ -3,8 +3,6 @@ export type CreateFields = Pick<TableFields,
 	| "first_name"
 	| "id_user_role"
 	| "last_name"
-	| "password"
-	| "salt"
 >;
 
 export type SearchFields = Partial<TableFields>;

@@ -1,79 +1,88 @@
-import PG from "pg";
+import { fileURLToPath } from "url";
+import { fork } from "child_process";
+import path from "path";
 
-export const bench = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const pool = new PG.Pool(config);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-	const promises = [];
+type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-	const users = (await pool.query<{ id: string; }>("SELECT id FROM users")).rows;
+export const benchAddSeeds = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds.js"));
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const start = performance.now();
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			pool.query(
-				"SELECT email FROM users WHERE users.id = $1",
-				[randomUserId],
-			),
-		);
-	}
-
-	await Promise.all(promises);
-
-	const execTime = Math.round(performance.now() - start);
-
-	await pool.end();
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };
 
-export const benchOneByOne = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const pool = new PG.Pool(config);
+export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
 
-	const promises = [];
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const users = (await pool.query<{ id: string; }>("SELECT id FROM users")).rows;
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+		child.send({ queryCount, config });
+	});
+};
 
-	const start = performance.now();
+export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select.js"));
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
+		child.on("message", (message: number) => {
+			child.kill();
 
-		promises.push(
-			pool.query(
-				"SELECT email FROM users WHERE users.id = $1",
-				[randomUserId],
-			),
-		);
-	}
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	for (const promise of promises) await promise;
+		child.send({ queryCount, config });
+	});
+};
 
-	const execTime = Math.round(performance.now() - start);
+export const benchSelectOneByOne = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select-one-by-one.js"));
 
-	await pool.end();
+		child.on("message", (message: number) => {
+			child.kill();
 
-	return execTime;
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
+	});
 };

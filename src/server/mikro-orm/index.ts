@@ -1,80 +1,48 @@
-import { User } from "./entities/User.js";
-import { init } from "./schema.js";
+import { fileURLToPath } from "url";
+import { fork } from "child_process";
+import path from "path";
 
-export const bench = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const { orm } = await init(config);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-	const promises = [];
+type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-	const users = await orm.em.fork().getRepository(User).find({}, { fields: ["id"] });
+export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select.js"));
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const start = performance.now();
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			orm.em.fork().getRepository(User).findOne(
-				{ id: randomUserId },
-				{ fields: ["id"] },
-			),
-		);
-	}
-
-	await Promise.all(promises);
-
-	const execTime = Math.round(performance.now() - start);
-
-	await orm.close();
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };
 
-export const benchOneByOne = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const { orm } = await init(config);
+export const benchSelectOneByOne = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select-one-by-one.js"));
 
-	const promises = [];
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const users = await orm.em.fork().getRepository(User).find({}, { fields: ["id"] });
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
-	const start = performance.now();
-
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			orm.em.fork().getRepository(User).findOne(
-				{ id: randomUserId },
-				{ fields: ["id"] },
-			),
-		);
-	}
-
-	for (const promise of promises) await promise;
-
-	const execTime = Math.round(performance.now() - start);
-
-	await orm.close();
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };

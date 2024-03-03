@@ -1,75 +1,48 @@
-import { PrismaClient } from "@prisma/client";
+import { fileURLToPath } from "url";
+import { fork } from "child_process";
+import path from "path";
 
-export const bench = async (queryCount: number) => {
-	const prisma = new PrismaClient();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-	const promises = [];
+type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-	await prisma.$connect();
+export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select.js"));
 
-	const users = await prisma.users.findMany({
-		select: { id: true },
+		child.on("message", (message: number) => {
+			child.kill();
+
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
 	});
-
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
-	const start = performance.now();
-
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			prisma.users.findFirst({
-				select: { email: true },
-				where: { id: randomUserId },
-			}),
-		);
-	}
-
-	await Promise.all(promises);
-
-	const execTime = Math.round(performance.now() - start);
-
-	await prisma.$disconnect();
-
-	return execTime;
 };
 
-export const benchOneByOne = async (queryCount: number) => {
-	const prisma = new PrismaClient();
+export const benchSelectOneByOne = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select-one-by-one.js"));
 
-	const promises = [];
+		child.on("message", (message: number) => {
+			child.kill();
 
-	await prisma.$connect();
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	const users = await prisma.users.findMany({
-		select: { id: true },
+		child.send({ queryCount, config });
 	});
-
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
-	const start = performance.now();
-
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			prisma.users.findFirst({
-				select: { email: true },
-				where: { id: randomUserId },
-			}),
-		);
-	}
-
-	for (const promise of promises) await promise;
-
-	const execTime = Math.round(performance.now() - start);
-
-	await prisma.$disconnect();
-
-	return execTime;
 };

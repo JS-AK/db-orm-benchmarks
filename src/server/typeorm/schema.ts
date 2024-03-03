@@ -12,6 +12,9 @@ export class User {
 	@PrimaryColumn({ name: "id" })
 	id: string;
 
+	@PrimaryColumn({ name: "id_user_role" })
+	userRoleId: string;
+
 	@Column({ name: "email" })
 	email: string;
 
@@ -31,6 +34,15 @@ export class User {
 	salt: string;
 }
 
+@Entity("user_roles")
+export class UserRole {
+	@PrimaryColumn({ name: "id" })
+	id: string;
+
+	@Column({ name: "title" })
+	firstName: string;
+}
+
 export const init = async (config: {
 	host: string;
 	port: number;
@@ -46,7 +58,7 @@ export const init = async (config: {
 		database: config.database,
 		type: "postgres",
 		synchronize: false,
-		entities: [User],
+		entities: [User, UserRole],
 	});
 
 	await PostgresDataSource.initialize();

@@ -1,87 +1,68 @@
-import { PG } from "@js-ak/db-manager";
+import { fileURLToPath } from "url";
+import { fork } from "child_process";
+import path from "path";
 
-import * as User from "./user/domain.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export const bench = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const user = new User.default(config);
+type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-	const promises = [];
+export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
 
-	const users = await user.getArrByParams({
-		params: {},
-		selected: ["id"],
+		child.on("message", (message: number) => {
+			child.kill();
+
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
 	});
-
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
-	const start = performance.now();
-
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			user.getOneByParams({
-				params: { id: randomUserId },
-				selected: ["email"],
-			}),
-		);
-	}
-
-	await Promise.all(promises);
-
-	const execTime = Math.round(performance.now() - start);
-
-	await PG.BaseModel.removeStandardPool(config);
-
-	return execTime;
 };
 
-export const benchOneByOne = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const user = new User.default(config);
+export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select.js"));
 
-	const promises = [];
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const users = await user.getArrByParams({
-		params: {},
-		selected: ["id"],
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
 	});
+};
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+export const benchSelectOneByOne = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select-one-by-one.js"));
 
-	const start = performance.now();
+		child.on("message", (message: number) => {
+			child.kill();
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-		promises.push(
-			user.getOneByParams({
-				params: { id: randomUserId },
-				selected: ["email"],
-			}),
-		);
-	}
-
-	for (const promise of promises) await promise;
-
-	const execTime = Math.round(performance.now() - start);
-
-	await PG.BaseModel.removeStandardPool(config);
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };

@@ -1,87 +1,68 @@
-import { User, init } from "./schema.js";
+import { fileURLToPath } from "url";
+import { fork } from "child_process";
+import path from "path";
 
-export const bench = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const { PostgresDataSource } = await init(config);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-	const promises = [];
+type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-	const users = (await PostgresDataSource
-		.getRepository(User)
-		.find({ select: ["id"] }));
+export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const start = performance.now();
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
-
-		promises.push(
-			PostgresDataSource
-				.getRepository(User)
-				.findOne({
-					select: ["email"],
-					where: { id: randomUserId },
-				}),
-		);
-	}
-
-	await Promise.all(promises);
-
-	const execTime = Math.round(performance.now() - start);
-
-	await PostgresDataSource.destroy();
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };
 
-export const benchOneByOne = async (queryCount: number, config: {
-	host: string;
-	port: number;
-	user: string;
-	password: string;
-	database: string;
-}) => {
-	const { PostgresDataSource } = await init(config);
+export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select.js"));
 
-	const promises = [];
+		child.on("message", (message: number) => {
+			child.kill();
 
-	const users = (await PostgresDataSource
-		.getRepository(User)
-		.find({ select: ["id"] }));
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	function getRandomInt(min: number, max: number) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
+		child.send({ queryCount, config });
+	});
+};
 
-	const start = performance.now();
+export const benchSelectOneByOne = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-select-one-by-one.js"));
 
-	for (let i = 0; i < queryCount; i++) {
-		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
+		child.on("message", (message: number) => {
+			child.kill();
 
-		promises.push(
-			PostgresDataSource
-				.getRepository(User)
-				.findOne({
-					select: ["email"],
-					where: { id: randomUserId },
-				}),
-		);
-	}
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
 
-	for (const promise of promises) await promise;
-
-	const execTime = Math.round(performance.now() - start);
-
-	await PostgresDataSource.destroy();
-
-	return execTime;
+		child.send({ queryCount, config });
+	});
 };

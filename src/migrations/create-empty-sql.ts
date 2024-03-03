@@ -1,5 +1,5 @@
-import * as DbMigrationSystem from "./lib/index.js";
+import { PG } from "@js-ak/db-manager";
 
-await DbMigrationSystem.CreateEmptySQL.create();
+await PG.MigrationSystem.CreateEmptySQL.create();
 
 process.exit(0);

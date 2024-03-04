@@ -4,15 +4,15 @@ import {
 	Column,
 	DataSource,
 	Entity,
-	PrimaryColumn,
+	PrimaryGeneratedColumn,
 } from "typeorm";
 
 @Entity("users")
 export class User {
-	@PrimaryColumn({ name: "id" })
+	@PrimaryGeneratedColumn({ name: "id" })
 	id: string;
 
-	@PrimaryColumn({ name: "id_user_role" })
+	@Column({ name: "id_user_role" })
 	userRoleId: string;
 
 	@Column({ name: "email" })
@@ -36,7 +36,7 @@ export class User {
 
 @Entity("user_roles")
 export class UserRole {
-	@PrimaryColumn({ name: "id" })
+	@PrimaryGeneratedColumn({ name: "id" })
 	id: string;
 
 	@Column({ name: "title" })

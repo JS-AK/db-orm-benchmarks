@@ -1,6 +1,7 @@
 export type CreateFields = Pick<TableFields,
 	| "email"
 	| "first_name"
+	| "is_deleted"
 	| "id_user_role"
 	| "last_name"
 >;

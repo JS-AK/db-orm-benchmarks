@@ -13,6 +13,8 @@ import {
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
 const start = async (queryCount: number, config: Config): Promise<number> => {
+	const promises = [];
+
 	const user = new User.Domain.default(config);
 	const userRole = new UserRole.Domain.default(config);
 
@@ -20,53 +22,31 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	const start = performance.now();
 
-	const pool = PG.BaseModel.getTransactionPool(config);
-	const client = await pool.connect();
+	for (let idx = 0; idx < queryCount; idx++) {
+		const randomEmail = generateRandomEmail();
+		const randomFirstName = getRandomFirstName();
+		const randomLastName = getRandomLastName();
 
-	const userIds: string[] = [];
-
-	try {
-		await client.query("BEGIN");
-
-		for (let idx = 0; idx < queryCount; idx++) {
-			const randomEmail = generateRandomEmail();
-			const randomFirstName = getRandomFirstName();
-			const randomLastName = getRandomLastName();
-
-			const { query, values } = PG.BaseModel
-				.getInsertFields<
-					User.Types.CreateFields,
-					User.Types.TableKeys
-				>({
-					params: {
-						email: randomEmail,
-						first_name: randomFirstName,
-						id_user_role: getUserRoleId(userRoles),
-						is_deleted: false,
-						last_name: randomLastName,
-					},
-					returning: ["id"],
-					tableName: user.tableName,
-				});
-
-			const { rows: [entity] } = await client.query<{ id: string; }>(query, values);
-
-			if (entity) userIds.push(entity.id);
-		}
-
-		await client.query("COMMIT");
-	} catch (err) {
-		await client.query("ROLLBACK");
-	} finally {
-		client.release();
+		promises.push(
+			user.createOne({
+				email: randomEmail,
+				first_name: randomFirstName,
+				id_user_role: getUserRoleId(userRoles),
+				is_deleted: false,
+				last_name: randomLastName,
+			}),
+		);
 	}
 
+	const users = await Promise.all(promises);
+
 	const execTime = Math.round(performance.now() - start);
+
+	const userIds = users.map((e) => e.id);
 
 	await user.deleteByParams({ params: { id: { $in: userIds } } });
 
 	await PG.BaseModel.removeStandardPool(config);
-	await PG.BaseModel.removeTransactionPool(config);
 
 	return execTime;
 };

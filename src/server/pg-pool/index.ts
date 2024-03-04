@@ -7,9 +7,9 @@ const __dirname = path.dirname(__filename);
 
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
-export const benchAddSeeds = async (queryCount: number, config: Config): Promise<number> => {
+export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
 	return new Promise((resolve, reject) => {
-		const child = fork(path.join(__dirname, "./child-bench-add-seeds.js"));
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
 
 		child.on("message", (message: number) => {
 			child.kill();
@@ -27,9 +27,9 @@ export const benchAddSeeds = async (queryCount: number, config: Config): Promise
 	});
 };
 
-export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
+export const benchAddSeeds = async (queryCount: number, config: Config): Promise<number> => {
 	return new Promise((resolve, reject) => {
-		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds.js"));
 
 		child.on("message", (message: number) => {
 			child.kill();

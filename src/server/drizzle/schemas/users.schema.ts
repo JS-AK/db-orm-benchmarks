@@ -15,7 +15,7 @@ export const users = pgTable("users", {
 	userRoleId: uuid("id_user_role").notNull().references(() => Schemas.userRoles.id, { onDelete: "cascade" }),
 	email: text("email"),
 	firstName: text("first_name"),
-	last_name: text("last_name"),
+	lastName: text("last_name"),
 	isDeleted: boolean("is_deleted").notNull(),
 	password: text("password"),
 	salt: text("salt"),

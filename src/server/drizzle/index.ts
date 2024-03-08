@@ -27,6 +27,46 @@ export const addSeedsInitial = async (config: Config): Promise<number> => {
 	});
 };
 
+export const benchAddSeedsInTransaction = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds-in-transaction.js"));
+
+		child.on("message", (message: number) => {
+			child.kill();
+
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
+	});
+};
+
+export const benchAddSeeds = async (queryCount: number, config: Config): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		const child = fork(path.join(__dirname, "./child-bench-add-seeds.js"));
+
+		child.on("message", (message: number) => {
+			child.kill();
+
+			resolve(message);
+		});
+		child.on("error", (err) => reject(err));
+		child.on("exit", (code) => {
+			if (code !== 0) {
+				reject(new Error(`Child process exited with code ${code}`));
+			}
+		});
+
+		child.send({ queryCount, config });
+	});
+};
+
 export const benchSelect = async (queryCount: number, config: Config): Promise<number> => {
 	return new Promise((resolve, reject) => {
 		const child = fork(path.join(__dirname, "./child-bench-select.js"));

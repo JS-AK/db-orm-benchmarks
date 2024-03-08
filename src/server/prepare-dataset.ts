@@ -1,11 +1,13 @@
+import { ConfigOptions } from "./config/index.js";
+
 import * as MigrationsDown from "../migrations/down.js";
 import * as MigrationsUp from "../migrations/up.js";
 
-import * as Drizzle from "./drizzle/index.js";
+import * as Pg from "./pg-pool/index.js";
 
 type DbConfig = { database: string; host: string; password: string; port: number; user: string; };
 
-export const start = async (config: any) => {
+export const start = async (config: ConfigOptions) => {
 	await MigrationsDown.start(config);
 	await MigrationsUp.start(config);
 
@@ -40,6 +42,6 @@ export const start = async (config: any) => {
 	];
 
 	for (const databaseConfig of databaseConfigs) {
-		await Drizzle.addSeedsInitial(databaseConfig);
+		await Pg.addSeedsInitial(databaseConfig);
 	}
 };

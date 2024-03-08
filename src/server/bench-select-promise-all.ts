@@ -1,3 +1,5 @@
+import { ConfigOptions } from "./config/index.js";
+
 import * as DbManager from "./db-manager/index.js";
 import * as Drizzle from "./drizzle/index.js";
 import * as Kysely from "./kysely/index.js";
@@ -13,7 +15,7 @@ type DbConfig = { database: string; host: string; password: string; port: number
 const queryCount = 50_000;
 const count = 10;
 
-export const start = async (config: any) => {
+export const start = async (config: ConfigOptions) => {
 	const createDbConfig = (database: string): DbConfig => ({
 		database,
 		host: config.DB_POSTGRE_HOST,
@@ -77,5 +79,7 @@ async function startBench(data: {
 	// console.log(`ATTEMPTS: ${times.map((e) => `${e}ms`).join(" ")}`);
 	// console.log(`AVG ${avgQPS}qps`);
 	// console.log(`AVG ${avg}ms`);
+
+	// eslint-disable-next-line no-console
 	console.log(`${name} |  ${avgQPS}            | ${times.map((e) => `${e}ms`).join(" | ")} | ${avg}ms |`);
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getConfig } from "../server/config/index.js";
 
 import { start as prepareDataset } from "./prepare-dataset.js";
@@ -18,12 +19,15 @@ if (!config) {
 	console.log("---Select-Promise.All--------------");
 	await benchSelectPromiseAll(config);
 	console.log("-----------------------------------");
+
 	console.log("---Select-one-by-one---------------");
 	await benchSelectOneByOne(config);
 	console.log("-----------------------------------");
+
 	console.log("---Insert-dataset-in-transaction---");
 	await benchInsertDatasetInTransaction(config);
 	console.log("-----------------------------------");
+
 	console.log("---Insert-dataset------------------");
 	await benchInsertDataset(config);
 	console.log("-----------------------------------");

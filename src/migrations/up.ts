@@ -2,7 +2,9 @@ import path from "node:path";
 
 import { PG } from "@js-ak/db-manager";
 
-export const start = async (config: any) => {
+import { ConfigOptions } from "../server/config/index.js";
+
+export const start = async (config: ConfigOptions) => {
 	const databases = [
 		config.DB_POSTGRE_DATABASE_DB_MANAGER,
 		config.DB_POSTGRE_DATABASE_DRIZZLE,

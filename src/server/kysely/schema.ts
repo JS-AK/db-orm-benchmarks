@@ -1,31 +1,13 @@
-import {
-	Generated,
-	Insertable,
-	Kysely,
-	PostgresDialect,
-	Selectable,
-	Updateable,
-} from "kysely";
+import { Kysely, PostgresDialect } from "kysely";
+
 import PG from "pg";
 
+import * as Schema from "./schemas/index.js";
+
 export interface Database {
-	users: UsersTable;
+	users: Schema.UsersTable;
+	["user-roles"]: Schema.UserRolesTable;
 }
-
-export interface UsersTable {
-	id: Generated<string>;
-
-	email: string;
-	first_name: string;
-	last_name: string | null;
-	is_deleted: boolean;
-	password: string;
-	salt: string;
-}
-
-export type User = Selectable<UsersTable>;
-export type NewUser = Insertable<UsersTable>;
-export type PersonUpdate = Updateable<UsersTable>;
 
 export const init = async (config: {
 	host: string;
@@ -34,13 +16,8 @@ export const init = async (config: {
 	password: string;
 	database: string;
 }) => {
-	const dialect = new PostgresDialect({
-		pool: new PG.Pool(config),
-	});
-
-	const db = new Kysely<Database>({
-		dialect,
-	});
+	const dialect = new PostgresDialect({ pool: new PG.Pool(config) });
+	const db = new Kysely<Database>({ dialect });
 
 	return { db };
 };

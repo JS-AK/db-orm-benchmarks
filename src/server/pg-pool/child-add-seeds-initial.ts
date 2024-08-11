@@ -26,15 +26,17 @@ const start = async (config: Config): Promise<number> => {
 		totalUsers: number,
 		batchSize: number,
 	) {
-		const batchPromises = [];
-
 		for (let i = 0; i < totalUsers; i += batchSize) {
-			for (let j = 0; j < batchSize; j++) {
+			const currentBatchSize = Math.min(batchSize, totalUsers - i);
+
+			const batch = [];
+
+			for (let j = 0; j < currentBatchSize; j++) {
 				const randomEmail = generateRandomEmail();
 				const randomFirstName = getRandomFirstName();
 				const randomLastName = getRandomLastName();
 
-				batchPromises.push(
+				batch.push(
 					pool.query<{ id: string; }>(`
 						INSERT INTO users(is_deleted, id_user_role, email, first_name, last_name)
 						VALUES ($1, $2, $3, $4, $5)
@@ -42,13 +44,13 @@ const start = async (config: Config): Promise<number> => {
 					`, [false, getUserRoleId(userRoles), randomEmail, randomFirstName, randomLastName]),
 				);
 			}
-		}
 
-		await Promise.all(batchPromises);
+			await Promise.all(batch);
+		}
 	}
 
 	const totalUsers = 1_000_000;
-	const batchSize = 10;
+	const batchSize = 10_000;
 
 	await insertUsersInBatches(totalUsers, batchSize);
 

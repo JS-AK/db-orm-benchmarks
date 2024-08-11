@@ -8,14 +8,35 @@ datasource db {
   url      = env("DATABASE_PRISMA_URL")
 }
 
-model users {
-  id          String     @id     @default(uuid())
-  email       String     @unique
-  first_name  String?
-  last_name   String?
-  is_deleted  Boolean
-  password    String?
-  salt        String?
-  created_at  DateTime
+model UserRole {
+	@@map("user_roles")
+
+	id          String     @id     @default(uuid())
+
+	title       String     @unique
+
+  created_at  DateTime?  @default(now())
   updated_at  DateTime?
+
+  User        User[]
+}
+
+model User {
+	@@map("users")
+
+	id           String     @id     @default(uuid())
+
+  id_user_role String
+
+  email        String     @unique
+  first_name   String?
+  last_name    String?
+  is_deleted   Boolean
+  password     String?
+  salt         String?
+
+  created_at   DateTime?  @default(now())
+  updated_at   DateTime?
+
+	UserRole     UserRole   @relation(fields: [id_user_role], references: [id])
 }

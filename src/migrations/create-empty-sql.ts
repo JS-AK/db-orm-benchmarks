@@ -1,5 +1,5 @@
-import { PG } from "@js-ak/db-manager";
+import { CreateEmptySQL } from "@js-ak/pg-migration-system";
 
-await PG.MigrationSystem.CreateEmptySQL.create();
+await CreateEmptySQL.create();
 
 process.exit(0);

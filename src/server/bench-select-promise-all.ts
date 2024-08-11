@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import { ConfigOptions } from "./config/index.js";
 
 import * as DbManager from "./db-manager/index.js";
@@ -46,7 +48,13 @@ export const start = async (config: ConfigOptions) => {
 		{ benchFunction: Kysely.benchSelect, queryCount, count, name: "kysely", config: kyselyConfig },
 	];
 
+	console.log("┌───────────────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬───────────┐");
+	console.log("│ orm db            │ avg query per sec |   1     │   2     │   3     │   4     │   5     │   6     │   7     │   8     │   9     │  10     │ avg       │");
+	console.log("├───────────────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────────┤");
+
 	for (const c of cases) await startBench(c);
+
+	console.log("└───────────────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴───────────┘");
 };
 
 async function startBench(data: {
@@ -76,10 +84,5 @@ async function startBench(data: {
 	const avg = (sum / times.length) || 0;
 	const avgQPS = Math.round((queryCount / avg) * 1000) || 0;
 
-	// console.log(`ATTEMPTS: ${times.map((e) => `${e}ms`).join(" ")}`);
-	// console.log(`AVG ${avgQPS}qps`);
-	// console.log(`AVG ${avg}ms`);
-
-	// eslint-disable-next-line no-console
-	console.log(`${name} |  ${avgQPS}            | ${times.map((e) => `${e}ms`).join(" | ")} | ${avg}ms |`);
+	console.log(`│ ${name.padEnd(18)}|${String(avgQPS).padStart(6)}             |${times.map((e) => `${String(e).padStart(6)}ms `).join("|")}|${String(avg.toFixed(1)).padStart(8)}ms |`);
 }

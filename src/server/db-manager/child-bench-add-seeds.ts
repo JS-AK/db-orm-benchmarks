@@ -32,7 +32,6 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 				email: randomEmail,
 				first_name: randomFirstName,
 				id_user_role: getUserRoleId(userRoles),
-				is_deleted: false,
 				last_name: randomLastName,
 			}),
 		);

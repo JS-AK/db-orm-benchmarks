@@ -6,9 +6,11 @@ CREATE TABLE users(
     email                           TEXT UNIQUE,
     first_name                      TEXT,
     last_name                       TEXT,
-    is_deleted                      BOOLEAN NOT NULL DEFAULT FALSE,
     password                        TEXT,
     salt                            TEXT,
+
+    deleted_at                      TIMESTAMP WITHOUT TIME ZONE,
+    is_deleted                      BOOLEAN NOT NULL DEFAULT FALSE,
 
     created_at                      TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     updated_at                      TIMESTAMP WITHOUT TIME ZONE,

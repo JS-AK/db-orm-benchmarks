@@ -33,11 +33,8 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 			const randomFirstName = getRandomFirstName();
 			const randomLastName = getRandomLastName();
 
-			const { query, values } = PG.BaseModel
-				.getInsertFields<
-					User.Types.CreateFields,
-					User.Types.TableKeys
-				>({
+			const [entity] = await user.model.queryBuilder({ client })
+				.insert({
 					params: {
 						email: randomEmail,
 						first_name: randomFirstName,
@@ -45,11 +42,9 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 						is_deleted: false,
 						last_name: randomLastName,
 					},
-					returning: ["id"],
-					tableName: user.tableName,
-				});
-
-			const { rows: [entity] } = await client.query<{ id: string; }>(query, values);
+				})
+				.returning(["id"])
+				.execute<{ id: string; }>();
 
 			if (entity) userIds.push(entity.id);
 		}

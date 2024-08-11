@@ -7,7 +7,7 @@ const start = async (queryCount: number) => {
 
 	await prisma.$connect();
 
-	const users = await prisma.users.findMany({
+	const users = await prisma.user.findMany({
 		select: { id: true },
 	});
 
@@ -21,7 +21,7 @@ const start = async (queryCount: number) => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			prisma.users.findFirst({
+			prisma.user.findFirst({
 				select: { email: true },
 				where: { id: randomUserId },
 			}),
@@ -43,3 +43,70 @@ process.on("message", async (message: { queryCount: number; }) => {
 
 	if (process.send) process.send(execTime);
 });
+
+/*
+	const prisma = new PrismaClient({
+		log: [
+			{
+				emit: "event",
+				level: "query",
+			},
+			{
+				emit: "stdout",
+				level: "error",
+			},
+			{
+				emit: "stdout",
+				level: "warn",
+			},
+		],
+	});
+
+	prisma.$on("query", (e) => {
+		let query = e.query;
+
+		try {
+			const params = JSON.parse(e.params);
+
+			for (let i = params.length; i > -1; i--) {
+				query = query.replace(
+					new RegExp("\\$" + String(i + 1), "g"),
+					isNaN(Number(params[i])) ? "'" + params[i] + "'" : params[i],
+				);
+			}
+		} catch (e) {
+			console.log(e);
+		}
+		const statements = [
+			"SELECT",
+			"JOIN",
+			"FROM",
+			"WHERE",
+			"OFFSET",
+			"IN",
+			"ORDER BY",
+			"ORDER",
+			"ASC",
+			"DESC",
+			"AND",
+			"OR",
+			"LIMIT",
+			"AS",
+			"INNER",
+			"LEFT",
+			"IS NOT NULL",
+			"IS NULL",
+		];
+
+		statements.map((statement) => {
+			query = query.replace(
+				new RegExp(statement, "g"),
+				chalk.green(statement),
+			);
+		});
+		console.log("----------------");
+		console.log(query);
+
+		console.log("Duration: " + (e.duration > 100 ? chalk.yellow(e.duration) : e.duration));
+	});
+*/

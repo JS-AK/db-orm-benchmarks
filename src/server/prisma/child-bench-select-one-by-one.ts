@@ -5,7 +5,7 @@ const start = async (queryCount: number) => {
 
 	await prisma.$connect();
 
-	const users = await prisma.users.findMany({
+	const users = await prisma.user.findMany({
 		select: { id: true },
 	});
 
@@ -21,7 +21,7 @@ const start = async (queryCount: number) => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			prisma.users.findFirst({
+			prisma.user.findFirst({
 				select: { email: true },
 				where: { id: randomUserId },
 			}),

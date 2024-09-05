@@ -5,7 +5,7 @@ import * as User from "./user/index.js";
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
 const start = async (queryCount: number, config: Config): Promise<number> => {
-	const user = new User.Domain.default(config);
+	const user = User.domain(config);
 
 	const promises = [];
 
@@ -35,7 +35,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	const execTime = Math.round(performance.now() - start);
 
-	await PG.BaseModel.removeStandardPool(config);
+	await PG.connection.shutdown();
 
 	return execTime;
 };

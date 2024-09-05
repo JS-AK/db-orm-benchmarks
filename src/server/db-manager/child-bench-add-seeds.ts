@@ -15,8 +15,8 @@ type Config = { host: string; port: number; user: string; password: string; data
 const start = async (queryCount: number, config: Config): Promise<number> => {
 	const promises = [];
 
-	const user = new User.Domain.default(config);
-	const userRole = new UserRole.Domain.default(config);
+	const user = User.domain(config);
+	const userRole = UserRole.domain(config);
 
 	const userRoles = (await userRole.getArrByParams({ params: {}, selected: ["id"] })).map((e) => e.id);
 
@@ -45,7 +45,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	await user.deleteByParams({ params: { id: { $in: userIds } } });
 
-	await PG.BaseModel.removeStandardPool(config);
+	await PG.connection.shutdown();
 
 	return execTime;
 };

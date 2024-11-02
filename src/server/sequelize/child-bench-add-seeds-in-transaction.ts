@@ -1,4 +1,4 @@
-import PG from "pg";
+import { init } from "./schema.js";
 
 import {
 	generateRandomEmail,
@@ -10,45 +10,41 @@ import {
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
 const start = async (queryCount: number, config: Config): Promise<number> => {
-	const pool = new PG.Pool(config);
+	const { User, UserRole, sequelize } = init(config);
 
-	const userRolesIds = (await pool.query<{ id: string; }>("SELECT id FROM user_roles")).rows.map((e) => e.id);
+	const userRolesIds = (await UserRole.findAll({ attributes: ["id"] }))
+		.map((e) => e.get({ plain: true }))
+		.map((e) => e.id);
 
 	const start = performance.now();
 
-	const client = await pool.connect();
-
 	const userIds: string[] = [];
 
-	try {
-		await client.query("BEGIN");
-
+	await sequelize.transaction(async (transaction) => {
 		for (let idx = 0; idx < queryCount; idx++) {
 			const randomEmail = generateRandomEmail();
 			const randomFirstName = getRandomFirstName();
 			const randomLastName = getRandomLastName();
 
-			const { rows: [entity] } = await client.query<{ id: string; }>(`
-				INSERT INTO users(is_deleted, id_user_role, email, first_name, last_name)
-				VALUES ($1, $2, $3, $4, $5)
-				RETURNING id
-			`, [false, getUserRoleId(userRolesIds), randomEmail, randomFirstName, randomLastName]);
+			const entity = await User.create({
+				id_user_role: getUserRoleId(userRolesIds),
 
-			if (entity) userIds.push(entity.id);
+				email: randomEmail,
+				first_name: randomFirstName,
+				last_name: randomLastName,
+
+				is_deleted: false,
+			}, { transaction });
+
+			if (entity) userIds.push(entity.get({ plain: true }).id);
 		}
-
-		await client.query("COMMIT");
-	} catch (err) {
-		await client.query("ROLLBACK");
-	} finally {
-		client.release();
-	}
+	});
 
 	const execTime = Math.round(performance.now() - start);
 
-	await pool.query("DELETE FROM users WHERE id = ANY($1)", [userIds]);
+	await User.destroy({ where: { id: userIds } });
 
-	await pool.end();
+	await sequelize.close();
 
 	return execTime;
 };

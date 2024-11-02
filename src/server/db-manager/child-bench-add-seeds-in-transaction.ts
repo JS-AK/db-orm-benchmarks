@@ -16,7 +16,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 	const user = User.domain(config);
 	const userRole = UserRole.domain(config);
 
-	const userRoles = (await userRole.getArrByParams({ params: {}, selected: ["id"] })).map((e) => e.id);
+	const userRolesIds = (await userRole.getArrByParams({ params: {}, selected: ["id"] })).map((e) => e.id);
 
 	const start = performance.now();
 
@@ -38,7 +38,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 					params: {
 						email: randomEmail,
 						first_name: randomFirstName,
-						id_user_role: getUserRoleId(userRoles),
+						id_user_role: getUserRoleId(userRolesIds),
 						is_deleted: false,
 						last_name: randomLastName,
 					},

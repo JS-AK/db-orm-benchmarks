@@ -15,14 +15,31 @@ export const init = (config: {
 	});
 
 	const User = sequelize.define("users", {
-		id: { type: DataTypes.UUIDV4, primaryKey: true },
+		id: { type: DataTypes.UUIDV4, primaryKey: true, defaultValue: () => crypto.randomUUID() },
+
+		id_user_role: { type: DataTypes.UUIDV4 },
+
 		email: { type: DataTypes.STRING },
 		first_name: { type: DataTypes.STRING },
 		last_name: { type: DataTypes.STRING },
-		is_deleted: { type: DataTypes.BOOLEAN },
 		password: { type: DataTypes.STRING },
 		salt: { type: DataTypes.STRING },
-	});
 
-	return { User, sequelize };
+		deleted_at: { type: DataTypes.DATE },
+		is_deleted: { type: DataTypes.BOOLEAN },
+
+		created_at: { type: DataTypes.DATE },
+		updated_at: { type: DataTypes.DATE },
+	}, { timestamps: false });
+
+	const UserRole = sequelize.define("user_roles", {
+		id: { type: DataTypes.UUIDV4, primaryKey: true, defaultValue: () => crypto.randomUUID() },
+
+		title: { type: DataTypes.STRING },
+
+		created_at: { type: DataTypes.DATE },
+		updated_at: { type: DataTypes.DATE },
+	}, { timestamps: false });
+
+	return { User, UserRole, sequelize };
 };

@@ -13,7 +13,7 @@ export class User {
 	id: string;
 
 	@Column({ name: "id_user_role" })
-	userRoleId: string;
+	idUserRole: string;
 
 	@Column({ name: "email" })
 	email: string;
@@ -40,7 +40,7 @@ export class UserRole {
 	id: string;
 
 	@Column({ name: "title" })
-	firstName: string;
+	title: string;
 }
 
 export const init = async (config: {

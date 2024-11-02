@@ -14,7 +14,7 @@ const start = async (queryCount: number): Promise<number> => {
 
 	await prisma.$connect();
 
-	const userRoles = (await prisma.userRole.findMany({
+	const userRolesIds = (await prisma.userRole.findMany({
 		select: { id: true },
 	})).map((e) => e.id);
 
@@ -26,18 +26,20 @@ const start = async (queryCount: number): Promise<number> => {
 		const randomLastName = getRandomLastName();
 
 		promises.push(
-			prisma.user.create({
+			() => prisma.user.create({
 				data: {
-					is_deleted: false,
-					id_user_role: getUserRoleId(userRoles),
+					id_user_role: getUserRoleId(userRolesIds),
+
 					email: randomEmail,
 					first_name: randomFirstName,
 					last_name: randomLastName,
+
+					is_deleted: false,
 				},
 			}),
 		);
 	}
-	const users = await Promise.all(promises);
+	const users = await Promise.all(promises.map((e) => e()));
 
 	const execTime = Math.round(performance.now() - start);
 

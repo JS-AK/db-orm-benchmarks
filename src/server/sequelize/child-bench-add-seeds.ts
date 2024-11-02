@@ -1,8 +1,4 @@
-import PG from "pg";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { inArray } from "drizzle-orm";
-
-import * as Schemas from "./schemas/index.js";
+import { init } from "./schema.js";
 
 import {
 	generateRandomEmail,
@@ -14,36 +10,45 @@ import {
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
 const start = async (queryCount: number, config: Config): Promise<number> => {
-	const pool = new PG.Pool(config);
-	const db = drizzle(pool);
+	const { User, UserRole, sequelize } = init(config);
 
-	const userRolesIds = (await db.select({ id: Schemas.userRoles.id }).from(Schemas.userRoles)).map((e) => e.id);
+	const promises = [];
+
+	const userRolesIds = (await UserRole.findAll({ attributes: ["id"] }))
+		.map((e) => e.get({ plain: true }))
+		.map((e) => e.id);
 
 	const start = performance.now();
-
-	const userIds: string[] = [];
 
 	for (let idx = 0; idx < queryCount; idx++) {
 		const randomEmail = generateRandomEmail();
 		const randomFirstName = getRandomFirstName();
 		const randomLastName = getRandomLastName();
 
-		const [entity] = await db.insert(Schemas.users).values({
-			email: randomEmail,
-			firstName: randomFirstName,
-			isDeleted: false,
-			lastName: randomLastName,
-			userRoleId: getUserRoleId(userRolesIds),
-		}).returning({ id: Schemas.users.id });
+		promises.push(
+			() => User.create({
+				id_user_role: getUserRoleId(userRolesIds),
 
-		if (entity) userIds.push(entity.id);
+				email: randomEmail,
+				first_name: randomFirstName,
+				last_name: randomLastName,
+
+				isDeleted: false,
+			}),
+		);
 	}
+
+	const users = await Promise.all(promises.map((e) => e()));
 
 	const execTime = Math.round(performance.now() - start);
 
-	await db.delete(Schemas.users).where(inArray(Schemas.users.id, userIds));
+	const userIds = users
+		.map((e) => e.get({ plain: true }))
+		.map((e) => e.id);
 
-	await pool.end();
+	await User.destroy({ where: { id: userIds } });
+
+	await sequelize.close();
 
 	return execTime;
 };

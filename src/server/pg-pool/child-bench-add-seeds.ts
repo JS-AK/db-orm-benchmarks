@@ -14,7 +14,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	const pool = new PG.Pool(config);
 
-	const userRoles = (await pool.query<{ id: string; }>("SELECT id FROM user_roles")).rows.map((e) => e.id);
+	const userRolesIds = (await pool.query<{ id: string; }>("SELECT id FROM user_roles")).rows.map((e) => e.id);
 
 	const start = performance.now();
 
@@ -24,14 +24,14 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomLastName = getRandomLastName();
 
 		promises.push(
-			pool.query<{ id: string; }>(`
+			() => pool.query<{ id: string; }>(`
 				INSERT INTO users(is_deleted, id_user_role, email, first_name, last_name)
 				VALUES ($1, $2, $3, $4, $5)
 				RETURNING id
-			`, [false, getUserRoleId(userRoles), randomEmail, randomFirstName, randomLastName]),
+			`, [false, getUserRoleId(userRolesIds), randomEmail, randomFirstName, randomLastName]),
 		);
 	}
-	const users = await Promise.all(promises);
+	const users = await Promise.all(promises.map((e) => e()));
 
 	const execTime = Math.round(performance.now() - start);
 

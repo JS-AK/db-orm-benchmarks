@@ -20,7 +20,7 @@ const start = async (config: Config): Promise<number> => {
 		return 0;
 	}
 
-	const userRoles = (await pool.query<{ id: string; }>("SELECT id FROM user_roles")).rows.map((e) => e.id);
+	const userRolesIds = (await pool.query<{ id: string; }>("SELECT id FROM user_roles")).rows.map((e) => e.id);
 
 	async function insertUsersInBatches(
 		totalUsers: number,
@@ -41,7 +41,7 @@ const start = async (config: Config): Promise<number> => {
 						INSERT INTO users(is_deleted, id_user_role, email, first_name, last_name)
 						VALUES ($1, $2, $3, $4, $5)
 						RETURNING id
-					`, [false, getUserRoleId(userRoles), randomEmail, randomFirstName, randomLastName]),
+					`, [false, getUserRoleId(userRolesIds), randomEmail, randomFirstName, randomLastName]),
 				);
 			}
 

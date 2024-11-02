@@ -20,14 +20,14 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			orm.em.fork().getRepository(User).findOne(
+			() => orm.em.fork().getRepository(User).findOne(
 				{ id: randomUserId },
 				{ fields: ["id"] },
 			),
 		);
 	}
 
-	await Promise.all(promises);
+	await Promise.all(promises.map((e) => e()));
 
 	const execTime = Math.round(performance.now() - start);
 

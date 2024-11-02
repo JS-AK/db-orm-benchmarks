@@ -28,7 +28,7 @@ const start = async (config: Config): Promise<number> => {
 		return 0;
 	}
 
-	const userRoles = (await db
+	const userRolesIds = (await db
 		.select({ id: Schemas.userRoles.id })
 		.from(Schemas.userRoles))
 		.map((e) => e.id);
@@ -52,7 +52,7 @@ const start = async (config: Config): Promise<number> => {
 					firstName: randomFirstName,
 					isDeleted: false,
 					lastName: randomLastName,
-					userRoleId: getUserRoleId(userRoles),
+					userRoleId: getUserRoleId(userRolesIds),
 				});
 			}
 

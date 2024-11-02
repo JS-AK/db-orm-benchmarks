@@ -21,14 +21,14 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			User.findOne({
+			() => User.findOne({
 				attributes: ["email"],
 				where: { id: randomUserId },
 			}),
 		);
 	}
 
-	for (const promise of promises) await promise;
+	for (const promise of promises) await promise();
 
 	const execTime = Math.round(performance.now() - start);
 

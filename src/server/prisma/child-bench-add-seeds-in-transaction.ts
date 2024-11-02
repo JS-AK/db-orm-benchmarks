@@ -12,9 +12,7 @@ const start = async (queryCount: number): Promise<number> => {
 
 	await prisma.$connect();
 
-	const userRoles = (await prisma.userRole.findMany({
-		select: { id: true },
-	})).map((e) => e.id);
+	const userRolesIds = (await prisma.userRole.findMany({ select: { id: true } })).map((e) => e.id);
 
 	const userIds: string[] = [];
 
@@ -29,11 +27,13 @@ const start = async (queryCount: number): Promise<number> => {
 
 				const entity = await tx.user.create({
 					data: {
-						is_deleted: false,
-						id_user_role: getUserRoleId(userRoles),
+						id_user_role: getUserRoleId(userRolesIds),
+
 						email: randomEmail,
 						first_name: randomFirstName,
 						last_name: randomLastName,
+
+						is_deleted: false,
 					},
 				});
 

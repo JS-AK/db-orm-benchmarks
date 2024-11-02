@@ -21,14 +21,14 @@ const start = async (queryCount: number) => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			prisma.user.findFirst({
+			() => prisma.user.findFirst({
 				select: { email: true },
 				where: { id: randomUserId },
 			}),
 		);
 	}
 
-	for (const promise of promises) await promise;
+	for (const promise of promises) await promise();
 
 	const execTime = Math.round(performance.now() - start);
 

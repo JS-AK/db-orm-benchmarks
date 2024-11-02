@@ -17,7 +17,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 	const pool = new PG.Pool(config);
 	const db = drizzle(pool);
 
-	const userRoles = (await db.select({ id: Schemas.userRoles.id }).from(Schemas.userRoles)).map((e) => e.id);
+	const userRolesIds = (await db.select({ id: Schemas.userRoles.id }).from(Schemas.userRoles)).map((e) => e.id);
 
 	const start = performance.now();
 
@@ -34,7 +34,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 				firstName: randomFirstName,
 				isDeleted: false,
 				lastName: randomLastName,
-				userRoleId: getUserRoleId(userRoles),
+				userRoleId: getUserRoleId(userRolesIds),
 			}).returning({ id: Schemas.users.id });
 
 			if (entity) userIds.push(entity.id);

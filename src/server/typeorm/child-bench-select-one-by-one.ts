@@ -24,7 +24,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			PostgresDataSource
+			() => PostgresDataSource
 				.getRepository(User)
 				.findOne({
 					select: ["email"],
@@ -33,7 +33,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		);
 	}
 
-	for (const promise of promises) await promise;
+	for (const promise of promises) await promise();
 
 	const execTime = Math.round(performance.now() - start);
 

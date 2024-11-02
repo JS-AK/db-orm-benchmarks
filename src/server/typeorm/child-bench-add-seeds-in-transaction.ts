@@ -16,7 +16,7 @@ type Config = { host: string; port: number; user: string; password: string; data
 const start = async (queryCount: number, config: Config): Promise<number> => {
 	const { PostgresDataSource } = await init(config);
 
-	const userRoles = (await PostgresDataSource.getRepository(UserRole).find({ select: ["id"] })).map((e) => e.id);
+	const userRolesIds = (await PostgresDataSource.getRepository(UserRole).find({ select: ["id"] })).map((e) => e.id);
 
 	const start = performance.now();
 
@@ -38,11 +38,13 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 				.manager
 				.getRepository(User)
 				.save({
-					isDeleted: false,
-					userRoleId: getUserRoleId(userRoles),
+					userRoleId: getUserRoleId(userRolesIds),
+
 					email: randomEmail,
 					firstName: randomFirstName,
 					lastName: randomLastName,
+
+					isDeleted: false,
 				});
 
 			if (entity) userIds.push(entity.id);

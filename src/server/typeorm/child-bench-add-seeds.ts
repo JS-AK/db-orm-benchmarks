@@ -18,7 +18,7 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	const { PostgresDataSource } = await init(config);
 
-	const userRoles = (await PostgresDataSource.getRepository(UserRole).find({ select: ["id"] })).map((e) => e.id);
+	const userRolesIds = (await PostgresDataSource.getRepository(UserRole).find({ select: ["id"] })).map((e) => e.id);
 
 	const start = performance.now();
 
@@ -28,19 +28,21 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomLastName = getRandomLastName();
 
 		promises.push(
-			PostgresDataSource
+			() => PostgresDataSource
 				.getRepository(User)
 				.save({
-					isDeleted: false,
-					userRoleId: getUserRoleId(userRoles),
+					userRoleId: getUserRoleId(userRolesIds),
+
 					email: randomEmail,
 					firstName: randomFirstName,
 					lastName: randomLastName,
+
+					isDeleted: false,
 				}),
 		);
 	}
 
-	const users = await Promise.all(promises);
+	const users = await Promise.all(promises.map((e) => e()));
 
 	const execTime = Math.round(performance.now() - start);
 

@@ -26,13 +26,13 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomUserId = users[getRandomInt(1, users.length - 1)]?.id as string;
 
 		promises.push(
-			db.select({ email: Schemas.users.email })
+			() => db.select({ email: Schemas.users.email })
 				.from(Schemas.users)
 				.where(eq(Schemas.users.id, randomUserId)),
 		);
 	}
 
-	for (const promise of promises) await promise;
+	for (const promise of promises) await promise();
 
 	const execTime = Math.round(performance.now() - start);
 

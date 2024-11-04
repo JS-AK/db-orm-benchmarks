@@ -1,7 +1,6 @@
-import { PG } from "@js-ak/db-manager";
-
-import * as User from "./user/index.js";
-import * as UserRole from "./user-role/index.js";
+import { User } from "./entities/User.js";
+import { UserRole } from "./entities/UserRole.js";
+import { init } from "./schema.js";
 
 import {
 	generateRandomEmail,
@@ -13,12 +12,14 @@ import {
 type Config = { host: string; port: number; user: string; password: string; database: string; };
 
 const start = async (queryCount: number, config: Config): Promise<number> => {
+	const { orm } = await init(config);
+
 	const promises = [];
 
-	const user = User.domain(config);
-	const userRole = UserRole.domain(config);
-
-	const userRolesIds = (await userRole.getArrByParams({ params: {}, selected: ["id"] })).map((e) => e.id);
+	const userRolesIds = (await orm.em.fork()
+		.getRepository(UserRole)
+		.find({}, { fields: ["id"] }))
+		.map((e) => e.id);
 
 	const start = performance.now();
 
@@ -28,13 +29,20 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 		const randomLastName = getRandomLastName();
 
 		promises.push(
-			() => user.createOne({
-				id_user_role: getUserRoleId(userRolesIds),
+			() => {
+				const user = new User();
 
-				email: randomEmail,
-				first_name: randomFirstName,
-				last_name: randomLastName,
-			}),
+				user.id = crypto.randomUUID();
+				user.idUserRole = getUserRoleId(userRolesIds);
+				user.email = randomEmail;
+				user.firstName = randomFirstName;
+				user.lastName = randomLastName;
+				user.isDeleted = false;
+				user.salt = null;
+				user.password = null;
+
+				return orm.em.fork().persistAndFlush(user).then(() => user);
+			},
 		);
 	}
 
@@ -42,11 +50,11 @@ const start = async (queryCount: number, config: Config): Promise<number> => {
 
 	const execTime = Math.round(performance.now() - start);
 
-	const userIds = users.map((e) => e.id);
+	await orm.em.fork()
+		.getRepository(User)
+		.nativeDelete({ id: { $in: users.map((e) => e.id) } });
 
-	await user.deleteByParams({ params: { id: { $in: userIds } } });
-
-	await PG.connection.shutdown();
+	await orm.close();
 
 	return execTime;
 };

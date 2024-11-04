@@ -5,7 +5,7 @@ import { ConfigOptions } from "./config/index.js";
 import * as DbManager from "./db-manager/index.js";
 import * as Drizzle from "./drizzle/index.js";
 // import * as Kysely from "./kysely/index.js";
-// import * as MikroOrm from "./mikro-orm/index.js";
+import * as MikroOrm from "./mikro-orm/index.js";
 // import * as Objection from "./objection/index.js";
 import * as Pg from "./pg-pool/index.js";
 import * as Prisma from "./prisma/index.js";
@@ -32,7 +32,7 @@ export const start = async (config: ConfigOptions) => {
 	const prismaConfig = createDbConfig(config.DB_POSTGRE_DATABASE_PRISMA);
 	const sequelizeConfig = createDbConfig(config.DB_POSTGRE_DATABASE_SEQUELIZE);
 	const typeormConfig = createDbConfig(config.DB_POSTGRE_DATABASE_TYPEORM);
-	// const mikroOrmConfig = createDbConfig(config.DB_POSTGRE_DATABASE_MIKRO_ORM);
+	const mikroOrmConfig = createDbConfig(config.DB_POSTGRE_DATABASE_MIKRO_ORM);
 	// const objectionJsConfig = createDbConfig(config.DB_POSTGRE_DATABASE_OBJECTION_JS);
 	// const kyselyConfig = createDbConfig(config.DB_POSTGRE_DATABASE_KYSELY);
 
@@ -43,7 +43,7 @@ export const start = async (config: ConfigOptions) => {
 		{ benchFunction: Prisma.benchAddSeedsInTransaction, queryCount, count, name: "@prisma/client", config: prismaConfig },
 		{ benchFunction: Sequelize.benchAddSeedsInTransaction, queryCount, count, name: "sequelize", config: sequelizeConfig },
 		{ benchFunction: TypeOrm.benchAddSeedsInTransaction, queryCount, count, name: "typeorm", config: typeormConfig },
-		// { benchFunction: MikroOrm.benchAddSeedsInTransaction, queryCount, count, name: "mikro-orm", config: mikroOrmConfig },
+		{ benchFunction: MikroOrm.benchAddSeedsInTransaction, queryCount, count, name: "mikro-orm", config: mikroOrmConfig },
 		// { benchFunction: Objection.benchAddSeedsInTransaction, queryCount, count, name: "objection.js", config: objectionJsConfig },
 		// { benchFunction: Kysely.benchAddSeedsInTransaction, queryCount, count, name: "kysely", config: kyselyConfig },
 	];

@@ -11,6 +11,9 @@ export class User {
 	@PrimaryKey({ name: "id" })
 	id: string;
 
+	@Property({ name: "id_user_role" })
+	idUserRole: string;
+
 	@Property({ name: "email" })
 	email: string;
 
@@ -23,9 +26,9 @@ export class User {
 	@Property({ name: "is_deleted" })
 	isDeleted: boolean;
 
-	@Property({ name: "password" })
-	password: string;
+	@Property({ name: "password", nullable: true })
+	password: string | null;
 
-	@Property({ name: "salt" })
-	salt: string;
+	@Property({ name: "salt", nullable: true })
+	salt: string | null;
 }
